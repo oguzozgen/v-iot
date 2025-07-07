@@ -1,0 +1,17 @@
+{
+  "name": "simple-device",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "minimist": "^1.2.8",
+    "mqtt": "^5.13.1"
+  }
+}
