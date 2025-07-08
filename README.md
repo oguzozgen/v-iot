@@ -3,7 +3,10 @@
 ## Prerequisites
 
 - Install **Node.js v22**
-- Install **pm2**
+- Install **pm2**  
+   ```sh
+   npm install pm2 -g
+   ```
 - Install **Docker** & **docker-compose**
 - Run  
   ```sh
@@ -97,6 +100,6 @@
 - For task GeoSpatial data, **PostGIS** would be better
 - Location is only live streamed and saved as metric; could be used for spatial calculations (alerts, distances, verifications) via PostGIS and/or turf.js
 - Improved stability needed
-- UI WebSocket token verification
+- ~~UI WebSocket token verification~~
 - Live demo under a domain
 - More microservice representation is needed; modular microservices were planned, but their separation was postponed due to time constraints.
