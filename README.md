@@ -17,6 +17,7 @@
 - Start UI:  
   ```sh
   npm i
+  npm run build
   npm run dev
   ```
   (in `v-ui` project)
