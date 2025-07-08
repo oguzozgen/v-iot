@@ -13,15 +13,22 @@
 - Sometimes **telegraf** inits early; restart the telegraf container if needed
 - Start UI:  
   ```sh
+  npm i
   npm run dev
   ```
   (in `v-ui` project)
 - Start API:  
   ```sh
+  npm i
   npm run start:dev
   ```
   (in `v-api` project)
-
+- Load Device:  
+  ```sh
+  npm i
+  ```
+  (in `simple-device` project)
+   application will start device.
 ---
 
 ## Quick Start Guide

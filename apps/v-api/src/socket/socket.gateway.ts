@@ -11,6 +11,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { SocketService } from '../common/services/socket.service';
+import { AuthService } from '../auth/auth.service'; // Import AuthService
 
 @WebSocketGateway({
   cors: {
@@ -25,29 +26,52 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   private readonly logger = new Logger(SocketGateway.name);
 
-  constructor(private readonly socketService: SocketService) {}
+  constructor(
+    private readonly socketService: SocketService,
+    private readonly authService: AuthService, // Inject AuthService
+  ) {}
 
   afterInit(server: Server) {
     this.socketService.setServer(server);
     this.logger.log('Socket.IO Gateway initialized');
   }
 
-  handleConnection(client: Socket) {
-    this.logger.log(`Client connected: ${client.id}`);
-    
-    // Send welcome message
-    client.emit('connection_established', {
-      clientId: client.id,
-      timestamp: Date.now(),
-      message: 'Connected to V-IoT Socket.IO server',
-    });
+  async handleConnection(client: Socket) {
+    try {
+      // Get token from client handshake auth 
+      
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const token = client.handshake.auth?.token || client.handshake.headers['authorization']?.split(' ')[1];
+      if (!token) {
+        this.logger.warn(`Client ${client.id} missing token, disconnecting`);
+        client.emit('error', 'Authentication token missing');
+        client.disconnect();
+        return;
+      }
+      // Validate token
+      await this.authService.validate({ headers: { authorization: `Bearer ${token}` } } as any);
+      this.logger.log(`Client connected: ${client.id} (token valid)`);
 
-    // Send current stats
-    const stats = {
-      connectedClients: this.socketService.getConnectedClientsCount(),
-      serverTime: Date.now(),
-    };
-    client.emit('server_stats', stats);
+      // Send welcome message
+      client.emit('connection_established', {
+        clientId: client.id,
+        timestamp: Date.now(),
+        message: 'Connected to V-IoT Socket.IO server',
+      });
+
+      // Send current stats
+      const stats = {
+        connectedClients: this.socketService.getConnectedClientsCount(),
+        serverTime: Date.now(),
+      };
+      client.emit('server_stats', stats);
+    } catch (err) {
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      this.logger.warn(`Client ${client.id} failed auth: ${err.message}`);
+      client.emit('error', 'Authentication failed');
+      client.disconnect();
+    }
   }
 
   handleDisconnect(client: Socket) {

@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import configApp from '../../config/config.app.jsx';
+import { useAuth } from "@clerk/clerk-react";
 
 // Message buffer for handling high-frequency messages
 const messageBuffer = [];
@@ -24,8 +25,11 @@ const getOrCreateClientId = () => {
 };
 
 // Create socket connection
-const createSocketConnection = (clientId) => {
+const createSocketConnection = (clientId, token) => {
   return io(configApp.serverAddress, {
+    auth: {
+      token: token
+    },
     transports: ['websocket', 'polling'],
     reconnection: true,
     reconnectionAttempts: 10,
@@ -57,6 +61,7 @@ const SocketContext = createContext({
 });
 
 export const SocketContextProvider = ({ children }) => {
+  const auth = useAuth();
   const [connected, setConnected] = useState(false);
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const [subscribedVin, setSubscribedVin] = useState(null);
@@ -223,9 +228,17 @@ export const SocketContextProvider = ({ children }) => {
       try {
         // Get or create client ID
         clientIdRef.current = getOrCreateClientId();
-
+        let token = "";
+        if (auth?.isSignedIn === true && auth?.isLoaded === true) {
+          let cookieParsed = document.cookie.split('; ').reduce((prev, current) => {
+            const [name, ...value] = current.split('=');
+            prev[name] = value.join('=');
+            return prev;
+          }, {});
+          token = cookieParsed.__session;
+        }
         // Create socket connection
-        socketRef.current = createSocketConnection(clientIdRef.current);
+        socketRef.current = createSocketConnection(clientIdRef.current, token);
 
         // Setup event listeners
         setupSocketListeners();

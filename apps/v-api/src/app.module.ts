@@ -12,6 +12,7 @@ import { Pm2DeviceManagementModule } from './pm2-device-management/pm2-device-ma
 import { MissionDutyModule } from './mission-duty/mission-duty.module';
 import { MissionEventsModule } from './mission-events/mission-events.module';
 import { InfluxdbModule } from './influxdb/influxdb.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { InfluxdbModule } from './influxdb/influxdb.module';
       }),
       inject: [ConfigService],
     }),
+    AuthModule,
     InfluxdbModule,
     VehicleRegistriesModule,
     TasksModule,
